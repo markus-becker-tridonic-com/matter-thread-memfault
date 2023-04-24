@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2022 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+mainmenu "Matter nRF Connect Light Bulb Example Application"
+
+# Sample configuration used for Thread networking
+if NET_L2_OPENTHREAD
+
+choice OPENTHREAD_NORDIC_LIBRARY_CONFIGURATION
+	default OPENTHREAD_NORDIC_LIBRARY_FTD
+endchoice
+
+choice OPENTHREAD_DEVICE_TYPE
+	default OPENTHREAD_FTD
+endchoice
+
+endif # NET_L2_OPENTHREAD
+
+source "${ZEPHYR_BASE}/../modules/lib/matter/config/nrfconnect/chip-module/Kconfig.features"
+source "${ZEPHYR_BASE}/../modules/lib/matter/config/nrfconnect/chip-module/Kconfig.defaults"
+source "Kconfig.zephyr"
