@@ -35,11 +35,15 @@
 #include "ota_util.h"
 #endif
 
+#ifdef CONFIG_MEMFAULT
+#include "memfault_udp.h"
+#endif
+
 #include <dk_buttons_and_leds.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/kernel.h>
 
-LOG_MODULE_DECLARE(app, CONFIG_MATTER_LOG_LEVEL);
+LOG_MODULE_DECLARE(app, CONFIG_KERNEL_LOG_LEVEL);
 
 using namespace ::chip;
 using namespace ::chip::app;
@@ -231,6 +235,22 @@ CHIP_ERROR AppTask::StartApp()
 	ReturnErrorOnFailure(Init());
 
 	AppEvent event = {};
+
+#ifdef CONFIG_MEMFAULT
+	LOG_INF("Memfault over UDP sample has started\n");
+
+	int memerr = memfault_server_init();
+	if (memerr)
+	{
+		LOG_ERR("Failed to initialize UDP server connection");
+	}
+
+	memerr = memfault_server_connect();
+	if (memerr)
+	{
+		LOG_ERR("Failed to connect to UDP server");
+	}
+#endif
 
 	while (true) {
 		k_msgq_get(&sAppEventQueue, &event, K_FOREVER);
@@ -511,6 +531,15 @@ void AppTask::ChipEventHandler(const ChipDeviceEvent *event, intptr_t /* arg */)
 #if CONFIG_CHIP_OTA_REQUESTOR
 		InitBasicOTARequestor();
 #endif /* CONFIG_CHIP_OTA_REQUESTOR */
+
+#ifdef CONFIG_MEMFAULT
+	if (sIsNetworkProvisioned && sIsNetworkEnabled) {
+		LOG_INF("Connected now. Schedule Memfault sending");
+		memfault_init_udp_message();
+		init_memfault_chunks_sender();
+		memfault_schedule();
+	}
+#endif
 		break;
 	case DeviceEventType::kThreadStateChange:
 		sIsNetworkProvisioned = ConnectivityMgr().IsThreadProvisioned();
