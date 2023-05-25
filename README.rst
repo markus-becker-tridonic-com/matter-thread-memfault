@@ -1,12 +1,16 @@
 .. _matter_light_bulb_sample:
 .. _chip_light_bulb_sample:
 
-Matter: Light bulb
+Matter: Light bulb (with Memfault integrated)
 ##################
 
 .. contents::
    :local:
    :depth: 2
+
+.. note::
+    This sample is a copy of the matter :ref:`light_bulb sample from the Nordic Connect SDK 2.3.0https://github.com/nrfconnect/sdk-nrf/tree/v2.3.0/samples/matter/light_bulb` with Memfault integration added.
+    Below is the original README.
 
 This light bulb sample demonstrates the usage of the :ref:`Matter <ug_matter>` application layer to build a white dimmable light bulb device.
 This device works as a Matter accessory device, meaning it can be paired and controlled remotely over a Matter network built on top of a low-power, 802.15.4 Thread network or on top of a Wi-Fi network.
