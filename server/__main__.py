@@ -1,14 +1,26 @@
 import requests
+import struct
 import socket
 
-LOCAL_IP = "localhost"
+INTERFACE = 'utun3'
 LOCAL_PORT = 20001
 BUFFER_SIZE = 508 + 28
 
-UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-UDPServerSocket.bind((LOCAL_IP, LOCAL_PORT))
+MEMFAULT_IPV6_GROUP_6 = 'ff05::f417'
 
-print(f"Listening on {LOCAL_IP}:{LOCAL_PORT}")
+addrinfo = socket.getaddrinfo(MEMFAULT_IPV6_GROUP_6, None)[0]
+
+print(addrinfo)
+
+UDPServerSocket = socket.socket(addrinfo[0], type=socket.SOCK_DGRAM)
+UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+UDPServerSocket.bind(('', LOCAL_PORT))
+
+group_bin = socket.inet_pton(addrinfo[0], addrinfo[4][0])
+mreq = group_bin + struct.pack('@I', socket.if_nametoindex(INTERFACE))
+UDPServerSocket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, mreq)
+
+print(f"Listening on interface {INTERFACE} port {LOCAL_PORT}")
 
 def post_chunk(project_key, chunk, device_serial):
     CHUNK_BASE_URL = "https://chunks.memfault.com"
